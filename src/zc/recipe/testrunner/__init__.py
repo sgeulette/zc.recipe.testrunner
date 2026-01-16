@@ -22,6 +22,7 @@ import pkg_resources
 import sys
 import zc.buildout.easy_install
 import zc.recipe.egg
+from packaging.utils import canonicalize_name
 
 
 class TestRunner(object):
@@ -43,8 +44,17 @@ class TestRunner(object):
         dest = []
         eggs, ws = self.egg.working_set(('zope.testrunner', ))
 
-        test_paths = [ws.find(pkg_resources.Requirement.parse(spec)).location
-                      for spec in eggs]
+        test_paths = []
+        for spec in eggs:
+            dist = ws.find(pkg_resources.Requirement.parse(spec))
+            if dist is None:  # pragma: no cover
+                new_spec = canonicalize_name(spec)
+                if spec != new_spec:
+                    dist = ws.find(pkg_resources.Requirement.parse(new_spec))
+                if dist is None:
+                    raise ValueError(
+                        "Requirement not found in working set: {}".format(spec))
+            test_paths.append(dist.location)
 
         defaults = options.get('defaults', '').strip()
         if defaults:

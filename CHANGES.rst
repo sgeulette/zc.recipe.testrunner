@@ -6,6 +6,8 @@ Change History
 ================
 
 - Add support for Python 3.9, PyPy2 and PyPy3.
+- If distribution is not found, try its canonical name.
+- If distribution is not found, explicitly show its name.
 
 
 2.1 (2019-05-14)
